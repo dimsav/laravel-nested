@@ -16,6 +16,9 @@ class CreateTables extends Migration {
         {
 			$table->increments('id');
 			$table->string('name');
+			$table->integer('parent_id')->unsigned()->nullable();
+			$table->integer('lft')->unsigned();
+			$table->integer('rght')->unsigned();
             $table->timestamps();
             $table->softDeletes();
 		});
