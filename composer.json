@@ -1,0 +1,31 @@
+{
+    "name": "dimsav/laravel-nested",
+    "description": "Add nested sets behavior to eloquent models",
+    "keywords": ["laravel", "nested-sets", "tree", "database"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Dimitrios Savvopoulos",
+            "email": "ds@dimsav.com",
+            "homepage": "http://dimsav.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.4.0",
+        "illuminate/support": "~4.0"
+    },
+    "require-dev": {
+        "orchestra/testbench": "~2.0",
+        "phpunit/phpunit": "~4.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Dimsav\\Nested\\": "Nested/"
+        },
+        "classmap": [
+            "tests"
+        ]
+    },
+
+    "minimum-stability": "dev"
+}
