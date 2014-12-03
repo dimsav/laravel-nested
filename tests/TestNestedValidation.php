@@ -25,4 +25,31 @@ class TestNestedValidation extends TestsBase {
         $category->validate();
     }
 
+    /**
+     * @expectedException Dimsav\Nested\Exceptions\UpperBorderException
+     * @test
+     */
+    public function validation_detects_false_right_border()
+    {
+        $category = Category::orderBy('rght', 'desc')->first();
+        $category->rght++;
+        $category->save();
+
+        $category->validate();
+    }
+
+
+    /**
+     * @expectedException Dimsav\Nested\Exceptions\LowerBorderException
+     * @test
+     */
+    public function validation_detects_false_left_border()
+    {
+        $category = Category::orderBy('lft', 'asc')->first();
+        $category->lft--;
+        $category->save();
+
+        $category->validate();
+    }
+
 }

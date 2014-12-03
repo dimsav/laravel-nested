@@ -1,6 +1,8 @@
 <?php namespace Dimsav\Nested;
 
 use DB;
+use Dimsav\Nested\Exceptions\UpperBorderException;
+use Dimsav\Nested\Exceptions\LowerBorderException;
 use Dimsav\Nested\Exceptions\DuplicateCoordinateException;
 use Illuminate\Database\Eloquent\Model;
 
@@ -42,9 +44,11 @@ trait Nested {
         return parent::save($options);
     }
 
+    // Todo: test with empty db.
     public function validate()
     {
         $this->validateDuplicateCoordinates();
+        $this->validateWrongBorder();
     }
 
     /**
@@ -72,6 +76,20 @@ trait Nested {
         if ($result[0]->count > 0)
         {
             throw new DuplicateCoordinateException;
+        }
+    }
+
+    private function validateWrongBorder()
+    {
+        $result = $this->select(DB::raw('MAX(rght) as max, MIN(lft) as min, Count(*) as count'))->first();
+
+        if (($result->count * 2) != $result->max)
+        {
+            throw new UpperBorderException;
+        }
+        if ($result->min < 1)
+        {
+            throw new LowerBorderException;
         }
     }
 }
