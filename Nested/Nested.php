@@ -1,6 +1,7 @@
 <?php namespace Dimsav\Nested;
 
 use DB;
+use Dimsav\Nested\Exceptions\CoordinateOrderException;
 use Dimsav\Nested\Exceptions\UpperBorderException;
 use Dimsav\Nested\Exceptions\LowerBorderException;
 use Dimsav\Nested\Exceptions\DuplicateCoordinateException;
@@ -49,6 +50,7 @@ trait Nested {
     {
         $this->validateDuplicateCoordinates();
         $this->validateWrongBorder();
+        $this->validate_coordinate_order();
     }
 
     /**
@@ -90,6 +92,15 @@ trait Nested {
         if ($result->min < 1)
         {
             throw new LowerBorderException;
+        }
+    }
+
+    private function validate_coordinate_order()
+    {
+        $badRecord = $this->where('lft', '>=', DB::raw('rght'))->first();
+        if ($badRecord)
+        {
+            throw new CoordinateOrderException;
         }
     }
 }

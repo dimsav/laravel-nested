@@ -52,4 +52,22 @@ class TestNestedValidation extends TestsBase {
         $category->validate();
     }
 
+    /**
+     * @expectedException Dimsav\Nested\Exceptions\CoordinateOrderException
+     * @test
+     */
+    public function validation_detects_when_left_is_greater_equal_than_right()
+    {
+        // We don't want to take a record with "border" coordinates to bypass
+        // the other validation errors
+        $category = Category::where('lft', '>', 1)->orderBy('lft', 'asc')->first();
+
+        $left = $category->lft;
+        $category->lft = $category->rght;
+        $category->rght = $left;
+        $category->save();
+
+        $category->validate();
+    }
+
 }
