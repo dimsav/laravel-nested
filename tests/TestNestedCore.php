@@ -17,7 +17,7 @@ class TestNestedCore extends TestsBase {
         $this->assertSame($greaterRight + 1, $category->lft);
         $this->assertSame($greaterRight + 2, $category->rght);
     }
-    
+
 //    /**
 //     * @test
 //     */
