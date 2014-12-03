@@ -70,4 +70,29 @@ class TestNestedValidation extends TestsBase {
         $category->validate();
     }
 
+    /**
+     * @expectedException Dimsav\Nested\Exceptions\InvalidDescendantsNumberException
+     * @test
+     */
+    public function validation_detects_when_the_descendants_number_is_wrong()
+    {
+        // We will create two sibling nodes at the end of the tree with wrong coordinates.
+        // To do that, we need the biggest right value.
+        $biggestRight = Category::orderBy('rght', 'desc')->first()->rght;
+
+        $cat1 = new Category();
+        $cat1->lft = $biggestRight + 1;
+        $cat1->rght = $biggestRight + 3;
+        $cat1->name = 'cat_1';
+        $cat1->save();
+
+        $cat2 = new Category();
+        $cat2->lft = $biggestRight + 2;
+        $cat2->rght = $biggestRight + 4;
+        $cat2->name = 'cat_2';
+        $cat2->save();
+
+        $cat1->validate();
+    }
+
 }

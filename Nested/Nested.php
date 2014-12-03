@@ -2,6 +2,7 @@
 
 use DB;
 use Dimsav\Nested\Exceptions\CoordinateOrderException;
+use Dimsav\Nested\Exceptions\InvalidDescendantsNumberException;
 use Dimsav\Nested\Exceptions\UpperBorderException;
 use Dimsav\Nested\Exceptions\LowerBorderException;
 use Dimsav\Nested\Exceptions\DuplicateCoordinateException;
@@ -12,45 +13,13 @@ use Illuminate\Database\Eloquent\Model;
  */
 trait Nested {
 
-    protected $positions = ['after', 'before', 'inside'];
-
-    public function save(array $options = [])
-    {
-        if ( ! $this->exists)
-        {
-            if ($this->parent_id === null)
-            {
-                if ($last = $this->orderBy('rght', 'DESC')->first())
-                {
-                    $this->lft = $last->rght + 1;
-                    $this->rght = $last->rght + 2;
-                }
-                else
-                {
-                    // todo
-                }
-            }
-            else
-            {
-//                $parent = $this->find($this->parent_id);
-//
-//                if ($last = $this->orderBy('rght', 'DESC')->first())
-//                {
-//                    $this->lft = $last->rght + 1;
-//                    $this->rght = $last->rght + 2;
-//                }
-            }
-        }
-
-        return parent::save($options);
-    }
-
     // Todo: test with empty db.
     public function validate()
     {
         $this->validateDuplicateCoordinates();
         $this->validateWrongBorder();
         $this->validate_coordinate_order();
+        $this->validate_number_of_descendants();
     }
 
     /**
@@ -101,6 +70,24 @@ trait Nested {
         if ($badRecord)
         {
             throw new CoordinateOrderException;
+        }
+    }
+
+    private function validate_number_of_descendants()
+    {
+        $table  = $this->getTable();
+        $result = DB::select(
+            DB::raw("SELECT (C.rght-C.lft-1)/2 AS descendants_count_1, COUNT(D.id) AS descendants_count_2
+                FROM $table AS C
+                LEFT JOIN $table AS D
+                ON D.lft > C.lft AND D.rght < C.rght
+                GROUP BY C.id
+                HAVING descendants_count_1 != descendants_count_2"
+            )
+        );
+        if (count($result))
+        {
+            throw new InvalidDescendantsNumberException;
         }
     }
 }
