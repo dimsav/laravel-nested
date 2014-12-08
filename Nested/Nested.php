@@ -30,16 +30,19 @@ trait Nested {
      */
     private function validateDuplicateCoordinates()
     {
-        $table  = $this->getTable();
+        $left = $this->getLeftName();
+        $right = $this->getRightName();
+        $table = $this->getTable();
+
         $result = DB::select(
             DB::raw("SELECT  count(*) as count
                 FROM $table AS C
                 JOIN $table AS D
                 WHERE C.id != D.id
                 AND (
-                  C.lft = D.lft
-                  OR C.lft = D.rght
-                  OR C.rght = D.rght
+                  C.$left = D.$left
+                  OR C.$left = D.$right
+                  OR C.$right = D.$right
                 )"
             )
         );
@@ -52,7 +55,10 @@ trait Nested {
 
     private function validateWrongBorder()
     {
-        $result = $this->select(DB::raw('MAX(rght) as max, MIN(lft) as min, Count(*) as count'))->first();
+        $left = $this->getLeftName();
+        $right = $this->getRightName();
+
+        $result = $this->select(DB::raw("MAX($right) as max, MIN($left) as min, Count(*) as count"))->first();
 
         if (($result->count * 2) != $result->max)
         {
@@ -66,7 +72,10 @@ trait Nested {
 
     private function validate_coordinate_order()
     {
-        $badRecord = $this->where('lft', '>=', DB::raw('rght'))->first();
+        $left = $this->getLeftName();
+        $right = $this->getRightName();
+
+        $badRecord = $this->where($left, '>=', DB::raw($right))->first();
         if ($badRecord)
         {
             throw new CoordinateOrderException;
@@ -75,19 +84,33 @@ trait Nested {
 
     private function validate_number_of_descendants()
     {
-        $table  = $this->getTable();
+        $left = $this->getLeftName();
+        $right = $this->getRightName();
+        $table = $this->getTable();
+
         $result = DB::select(
-            DB::raw("SELECT (C.rght-C.lft-1)/2 AS descendants_count_1, COUNT(D.id) AS descendants_count_2
+            DB::raw("SELECT (C.$right-C.$left-1)/2 AS descendants_count_1, COUNT(D.id) AS descendants_count_2
                 FROM $table AS C
                 LEFT JOIN $table AS D
-                ON D.lft > C.lft AND D.rght < C.rght
+                ON D.$left > C.$left AND D.$right < C.$right
                 GROUP BY C.id
                 HAVING descendants_count_1 != descendants_count_2"
             )
         );
+
         if (count($result))
         {
             throw new InvalidDescendantsNumberException;
         }
+    }
+
+    protected function getLeftName()
+    {
+        return 'lft';
+    }
+
+    protected function getRightName()
+    {
+        return 'rght';
     }
 }
