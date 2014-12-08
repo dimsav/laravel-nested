@@ -76,6 +76,7 @@ trait Nested {
         $right = $this->getRightName();
 
         $badRecord = $this->where($left, '>=', DB::raw($right))->first();
+
         if ($badRecord)
         {
             throw new CoordinateOrderException;
