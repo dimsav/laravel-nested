@@ -1,4 +1,4 @@
-laravel-nested
+laravel-nested (alpha)
 ==============
 
-Trait adding nested sets functionality to eloquent models
+Trait adding nested sets validation to eloquent models

@@ -1,6 +1,6 @@
 {
     "name": "dimsav/laravel-nested",
-    "description": "Add nested sets behavior to eloquent models",
+    "description": "Add nested sets validation to eloquent models",
     "keywords": ["laravel", "nested-sets", "tree", "database"],
     "license": "MIT",
     "authors": [
